@@ -1,20 +1,23 @@
-<script>
-	import { count, countSubject } from '../store';
-
-	countSubject.subscribe((value) => count.set(value));
-
-	const upup = () => {
-		countSubject.next(countSubject.value + 1);
-	};
-
-	const down = () => {
-		countSubject.next(countSubject.value - 1);
-	};
+<script lang="ts">
+	import { countSubject } from '../store';
+	import CountBtn from './Counter.svelte';
 </script>
 
-<span>{$count}</span>
-<button on:click={upup}>+</button>
-<button on:click={down}>-</button>
+<div class="counter">
+	<strong>{$countSubject}</strong>
+	<CountBtn />
+</div>
 
 <style>
+	div {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		width: 100vw;
+	}
+	strong {
+		font-size: 40px;
+		font-weight: bold;
+		text-align: center;
+	}
 </style>
