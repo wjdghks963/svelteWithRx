@@ -1,23 +1,12 @@
 <script lang="ts">
-	import { countSubject } from '../store';
-	import CountBtn from './Counter.svelte';
+	import Post from '../components/Post.svelte';
+
+	/** @type {import('./$types').PageData} */
+	export let data: { data: Moive.MovieInfo[] };
 </script>
 
-<div class="counter">
-	<strong>{$countSubject}</strong>
-	<CountBtn />
+<div>
+	{#each data.data as movieDetail}
+		<Post {movieDetail} />
+	{/each}
 </div>
-
-<style>
-	div {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		width: 100vw;
-	}
-	strong {
-		font-size: 40px;
-		font-weight: bold;
-		text-align: center;
-	}
-</style>

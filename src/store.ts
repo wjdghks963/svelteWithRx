@@ -6,4 +6,4 @@ const count: Writable<number> = writable(countSubject.value);
 
 countSubject.subscribe((value) => count.set(value));
 
-export { countSubject };
+export { count, countSubject };

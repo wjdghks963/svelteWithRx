@@ -50,7 +50,7 @@ Svelte 컴파일러는 구성 요소를 페이지의 HTML을 렌더링하기 위
 - src/routes/about = > /about
 - src/routes/about/[slug] /about/231 or /about/123 ...
 
-페이지 이동을 위한 태그를 사용할 때 `<a>` 대신 `<Link>`를 사용한다.
+페이지 이동을 위한 경로를 탐색할때 `<Link>`가 아니라 `<a>` 를 사용한다.
 
 ### Page
 
@@ -176,4 +176,108 @@ export async function POST({ request }) {
 	const { a, b } = await request.json();
 	return json(a + b);
 }
+```
+
+# Rxjs
+
+Rxjs는 관찰 가능한 시퀀스를 사용해 비동기 및 이벤트 기반 프로그램을 구성하기 위한 라이브러리다.
+
+따라서 비동기인 UI처리를 하는 프론트엔드에 유용한 라이브러리다. => 하지만 react는 reactive는 아니지만 그와 비슷한 느낌을 낼 수 있게 구현하고 있다.
+
+[svelte & rxjs 영업 블로그글](https://velog.io/@teo/Svelte-Rxjs-Vite-AdorableCSS)
+
+## 가장 중요한 concepts
+
+- Observable : 미래의 값이나 이벤트를 호출 가능한 컬렉션 아이디어를 나타낸다.
+
+- Observer : Observable이 전달한 값을 수신하는 방법을 알고 있는 콜백 모음
+
+- Subscription : Observable의 실행을 나타내며 주로 실행을 취소하는데 유용하다.
+
+- Operators : map, filter, concat, reduce 등 작업으로 컬렉션을 처리하는 기능적 프로그래밍 스타일을 가능하게 하는 순수 함수
+
+- Subject : EventEmitter와 동일하며 값이나 이벤트를 여러 Observer들에게 멀티 캐스팅하는 유일한 방법
+
+- Schedulers : 동시성을 제어하는 중앙 집중식 디스패처 ex) 계산이 발생할 때 조정할 수 있거나 setTimeout 등...
+
+## Store
+
+Svelte는 컴포넌트 간 데이터를 공유하는 방법으로 Store를 제공한다. => React의 Redux와 같은 상태관리 툴을 프레임워크 내에서 제공
+
+어디에서나 svelte/store에서 제공해주는 기능으로 Global하게 접근 가능한 **값**을 만들어준다.
+
+### writable(initialValue)
+
+store 모듈에 존재하는 writable 함수를 이용해 읽고 쓰는 값을 생성할 수 있다.
+
+```javascript
+import { writable } from 'svelte/store';
+
+const count = writable(0);
+
+// oneComponent
+import { count } from './store';
+
+// 1. subscribe 메서드를 이용해 구독
+count.subscribe((value) => value);
+
+// 2. 선언식을 사용해 간단하게 표현 count가 어디서든 바뀐다면 계산 및 컴포넌트를 업데이트 한다.
+$count;
+```
+
+count라는 값을 읽기 위해서는 사용할 컴포넌트에서 subscribe 메서드를 사용해 구독을 해야한다.
+
+콜백을 이용해 값을 바꾸거나 사용할 수 있다.
+
+- update : store의 값을 변경할 수 있으며 인자로 콜백을 받는다. => 변경된 값은 store의 값에 저장된다.
+
+- get : store에 저장된 값을 가져온다.
+
+- set : 새 값을 인자로 받으며 이 값을 store의 값에 업데이트한다.
+
+update 와 set의 차이점
+
+update는 새 값 대신 함수를 인수로 사용한다. 이 함수는 store의 현재 값을 인수로 사용하고 새 값을 반환한다.\
+이렇게 하면 단순히 새 값으로 덮어쓰는 것 대신 현재 값을 늘리거나 중리는 등 더 복잡한 업데이트가 가능하다.
+
+이 부분은 react의 useState가 안에서 콜백을 받을 때와 비슷하다.
+
+### readable(initialValue, start?)
+
+start는 선택 사항이며 처음 구독할때 호출할 기능을 지정할 수 있다.
+
+이 값은 메서드의 이름과 같이 읽기 전용이며 update가 불가능하다.
+
+### derived(stores:store[], fn:callBack)
+
+다른 store를 기반으로 하는 파생 store를 생성한다.
+
+파생된 store는 업데이트에 의존하는 store 중 하나가 업데이트 될때마다 값을 update 한다.
+
+두번째 매개변수인 fn는 store의 현재 값을 수신하고 파생된 store에 대한 새 값을 리턴하는 함수다.
+
+```javascript
+import { readable, derived } from 'svelte/store';
+
+const count = readable(0);
+const doubleCount = derived([count], ($count) => $count * 2);
+
+count.set(10);
+console.log(doubleCount.get()); // 20
+```
+
+### subscribe(store, callback)
+
+store가 인자로 전달되면 해당 store의 업데이트를 구독하고 업데이트가 이루어 질때 마다 콜백 함수가 호출된다.
+
+```javascript
+import { writable } from 'svelte/store';
+
+const count = writable(0);
+
+count.subscribe((value) => {
+	console.log('Count has been updated to:', value);
+});
+
+count.set(5); // Console log: Count has been updated to: 5
 ```
